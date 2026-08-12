@@ -1,0 +1,321 @@
+/* =========================
+   GLOBAL
+   ========================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f0e9;
+    color: #112250;
+}
+
+
+/* =========================
+   HEADER
+   ========================= */
+
+header {
+    width: 100%;
+    background: #fdfbf8;
+    padding: 22px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #d9cbc2;
+}
+
+.logo {
+    color: #112250;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+.logo:hover {
+    color: #30507d;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+nav a {
+    color: #485070;
+    text-decoration: none;
+    font-size: 15px;
+    transition: 0.25s;
+}
+
+nav a:hover {
+    color: #112250;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.login-link {
+    color: #112250;
+    text-decoration: none;
+    font-size: 15px;
+}
+
+.login-link:hover {
+    color: #30507d;
+}
+
+.join-btn {
+    color: #f5f0e9;
+    background: #112250;
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: 0.25s;
+}
+
+.join-btn:hover {
+    background: #30507d;
+}
+
+
+/* =========================
+   LOGIN PAGE
+   ========================= */
+
+main {
+    min-height: calc(100vh - 180px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 70px 20px;
+    background: #f5f0e9;
+}
+
+
+/* =========================
+   LOGIN CARD
+   ========================= */
+
+.auth-card {
+    width: 430px;
+    max-width: 100%;
+    background: #fdfbf8;
+    border: 1px solid #d9cbc2;
+    border-radius: 24px;
+    padding: 50px;
+    text-align: center;
+    box-shadow: 0 18px 50px rgba(17, 34, 80, 0.15);
+}
+
+
+/* =========================
+   DECORATION
+   ========================= */
+
+.auth-decoration {
+    font-size: 30px;
+    color: #e0c58f;
+    margin-bottom: 15px;
+}
+
+
+/* =========================
+   LABEL
+   ========================= */
+
+.auth-label {
+    color: #30507d;
+    font-size: 12px;
+    letter-spacing: 4px;
+    margin: 0 0 10px;
+}
+
+
+/* =========================
+   HEADING
+   ========================= */
+
+.auth-card h1 {
+    color: #112250;
+    font-size: 42px;
+    font-weight: 400;
+    margin: 10px 0;
+}
+
+
+/* =========================
+   SUBTITLE
+   ========================= */
+
+.auth-subtitle {
+    color: #485070;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 0 35px;
+}
+
+
+/* =========================
+   FORM
+   ========================= */
+
+.form-group {
+    text-align: left;
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    color: #112250;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 15px 16px;
+    border: 1px solid #d9cbc2;
+    border-radius: 10px;
+    background: #fdfbf8;
+    color: #112250;
+    font-size: 15px;
+    outline: none;
+    transition: 0.25s;
+}
+
+.form-group input::placeholder {
+    color: #999;
+}
+
+.form-group input:focus {
+    border-color: #30507d;
+    box-shadow: 0 0 0 3px rgba(48, 80, 125, 0.12);
+}
+
+
+/* =========================
+   LOGIN BUTTON
+   ========================= */
+
+.auth-button {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 10px;
+    background: #112250;
+    color: #f5f0e9;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.auth-button:hover {
+    background: #30507d;
+    transform: translateY(-2px);
+}
+
+
+/* =========================
+   ERROR MESSAGE
+   ========================= */
+
+.error-message {
+    background: #f3dede;
+    color: #7a3030;
+    border: 1px solid #d9b5b5;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+
+/* =========================
+   CREATE ACCOUNT
+   ========================= */
+
+.auth-footer {
+    margin-top: 28px;
+    color: #485070;
+    font-size: 14px;
+}
+
+.auth-footer a {
+    color: #30507d;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================
+   FOOTER
+   ========================= */
+
+footer {
+    background: #112250;
+    color: #f5f0e9;
+    text-align: center;
+    padding: 35px 20px;
+}
+
+footer p {
+    font-size: 18px;
+    margin: 0 0 8px;
+}
+
+footer span {
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 800px) {
+
+    header {
+        padding: 20px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        gap: 18px;
+    }
+
+    .nav-actions {
+        margin-left: auto;
+    }
+
+    main {
+        padding: 40px 15px;
+    }
+
+    .auth-card {
+        padding: 35px 25px;
+    }
+
+    .auth-card h1 {
+        font-size: 34px;
+    }
+}
