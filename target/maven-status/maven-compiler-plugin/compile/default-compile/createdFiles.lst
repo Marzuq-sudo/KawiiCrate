@@ -1,8 +1,11 @@
 com/kawaiicrate/model/User.class
+com/kawaiicrate/model/Product.class
 com/kawaiicrate/controller/LoginServlet.class
 com/kawaiicrate/service/UserService.class
 com/kawaiicrate/util/PasswordUtil.class
 RegisterServlet.class
+com/kawaiicrate/controller/ProductServlet.class
 com/kawaiicrate/dao/UserDAO.class
+com/kawaiicrate/dao/ProductDAO.class
 com/kawaiicrate/controller/LogoutServlet.class
 com/kawaiicrate/util/DatabaseUtil.class
