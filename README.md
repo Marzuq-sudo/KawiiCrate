@@ -14,16 +14,16 @@ Kawaii Crate supports three distinct user roles — buyers, sellers, and admins 
 
 <img width="1399" height="881" alt="Screenshot 2026-09-20 at 10 37 34 PM" src="https://github.com/user-attachments/assets/c745d53c-af41-4941-b3de-209e017f97fa" />
 
-
 ---
 
 ## Current Features
+
 
 - User Registration
   <img width="1399" height="804" alt="Screenshot 2026-09-20 at 10 38 39 PM" src="https://github.com/user-attachments/assets/0591ba0f-8b2d-4306-9f1d-847cbfd22871" />
 
 - User Login and Logout
- <img width="1399" height="804" alt="Screenshot 2026-09-20 at 10 38 57 PM" src="https://github.com/user-attachments/assets/3fadf951-aa4c-4fb6-8582-14e5677ab8a1" />
+  <img width="1399" height="804" alt="Screenshot 2026-09-20 at 10 38 57 PM" src="https://github.com/user-attachments/assets/3fadf951-aa4c-4fb6-8582-14e5677ab8a1" />
 
 - BCrypt Password Hashing
   <img width="1399" height="804" alt="Screenshot 2026-09-20 at 10 39 44 PM" src="https://github.com/user-attachments/assets/6eeb996b-8302-4bcc-ad8d-897769335d1d" />
@@ -47,12 +47,11 @@ Kawaii Crate supports three distinct user roles — buyers, sellers, and admins 
 - Order Management
   <img width="1399" height="804" alt="Screenshot 2026-09-20 at 10 44 45 PM" src="https://github.com/user-attachments/assets/65688419-3b5d-43a8-ba96-f738a41b8321" />
 
-- PostgreSQL Database
+- Docker
 - <img width="1424" height="900" alt="Screenshot 2026-09-20 at 10 46 00 PM" src="https://github.com/user-attachments/assets/da385083-946a-4b0f-897e-12a5c9c54cfa" />
 
 
 <img width="1407" height="807" alt="Screenshot 2026-09-20 at 10 48 48 PM" src="https://github.com/user-attachments/assets/7f601013-4366-41b0-aa2b-fa7fcafc8945" />
-
 
 ---
 
