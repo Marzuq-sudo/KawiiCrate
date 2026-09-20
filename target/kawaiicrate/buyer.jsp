@@ -1,7 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
-    // Check whether the user is logged in
+    // =========================================
+    // CHECK LOGIN
+    // =========================================
+
     if (session.getAttribute("user") == null) {
         response.sendRedirect(
                 request.getContextPath() + "/login.jsp"
@@ -14,9 +17,22 @@
 
     String userEmail =
             (String) session.getAttribute("userEmail");
+
+
+    // =========================================
+    // LOAD PRODUCTS
+    // =========================================
+
+    com.kawaiicrate.dao.ProductDAO productDAO =
+            new com.kawaiicrate.dao.ProductDAO();
+
+    java.util.List<com.kawaiicrate.model.Product> allProducts =
+            productDAO.getAllProducts();
 %>
 
+
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -26,7 +42,8 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Kawaii Crate | Home</title>
+    <title>Kawaii Crate | Shop</title>
+
 
     <style>
 
@@ -41,11 +58,16 @@
         }
 
 
+        /* =========================================
+           BODY
+           ========================================= */
+
         body {
+
             font-family:
-                Georgia,
-                "Times New Roman",
-                serif;
+                    Georgia,
+                    "Times New Roman",
+                    serif;
 
             background: #f5f0e9;
 
@@ -68,13 +90,19 @@
             background: #fdfbf8;
 
             border-bottom:
-                1px solid #d9cbc2;
+                    1px solid #d9cbc2;
 
             display: flex;
 
             align-items: center;
 
             justify-content: space-between;
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 100;
         }
 
 
@@ -96,7 +124,9 @@
 
             display: flex;
 
-            gap: 35px;
+            gap: 30px;
+
+            align-items: center;
         }
 
 
@@ -295,8 +325,8 @@
             padding: 35px;
 
             box-shadow:
-                0 15px 40px
-                rgba(17, 34, 80, 0.10);
+                    0 15px 40px
+                    rgba(17, 34, 80, 0.10);
         }
 
 
@@ -321,7 +351,7 @@
             padding: 15px 0;
 
             border-bottom:
-                1px solid #e5ddd5;
+                    1px solid #e5ddd5;
         }
 
 
@@ -346,6 +376,335 @@
             font-size: 14px;
 
             font-weight: 600;
+        }
+
+
+        /* =========================================
+           PRODUCTS SECTION
+           ========================================= */
+
+        .products-section {
+
+            padding: 90px 60px;
+
+            max-width: 1250px;
+
+            margin: auto;
+        }
+
+
+        .products-heading {
+
+            text-align: center;
+
+            margin-bottom: 45px;
+        }
+
+
+        .products-heading .small-title {
+
+            color: #30507d;
+
+            font-size: 12px;
+
+            letter-spacing: 4px;
+
+            margin-bottom: 12px;
+        }
+
+
+        .products-heading h2 {
+
+            color: #112250;
+
+            font-size: 38px;
+
+            font-weight: 400;
+
+            margin-bottom: 12px;
+        }
+
+
+        .products-heading p {
+
+            color: #6b6d7c;
+
+            font-size: 14px;
+
+            line-height: 1.7;
+        }
+
+
+        /* =========================================
+           PRODUCT GRID
+           ========================================= */
+
+        .product-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                    repeat(3, minmax(0, 1fr));
+
+            gap: 25px;
+        }
+
+
+        /* =========================================
+           PRODUCT CARD
+           ========================================= */
+
+        .product-card {
+
+            background: #fdfbf8;
+
+            border: 1px solid #d9cbc2;
+
+            border-radius: 18px;
+
+            padding: 25px;
+
+            transition:
+                    transform 0.25s,
+                    box-shadow 0.25s;
+
+            display: flex;
+
+            flex-direction: column;
+        }
+
+
+        .product-card:hover {
+
+            transform: translateY(-5px);
+
+            box-shadow:
+                    0 15px 35px
+                    rgba(17, 34, 80, 0.12);
+        }
+
+
+        /* =========================================
+           PRODUCT IMAGE
+           ========================================= */
+
+        .product-image {
+
+            width: 100%;
+
+            height: 180px;
+
+            object-fit: cover;
+
+            border-radius: 12px;
+
+            margin-bottom: 18px;
+
+            background: #efe8df;
+
+            border: 1px solid #e5ddd5;
+        }
+
+
+        .product-number {
+
+            color: #e0c58f;
+
+            font-size: 12px;
+
+            letter-spacing: 2px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .product-card h3 {
+
+            color: #112250;
+
+            font-size: 22px;
+
+            font-weight: 400;
+
+            margin-bottom: 10px;
+        }
+
+
+        .product-category {
+
+            color: #7b7d8d;
+
+            font-size: 13px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .product-details {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 15px 0;
+
+            border-top:
+                    1px solid #e5ddd5;
+
+            border-bottom:
+                    1px solid #e5ddd5;
+
+            margin-bottom: 20px;
+        }
+
+
+        .product-price {
+
+            color: #112250;
+
+            font-size: 20px;
+
+            font-weight: bold;
+        }
+
+
+        .product-stock {
+
+            color: #6b6d7c;
+
+            font-size: 12px;
+        }
+
+
+        .out-of-stock {
+
+            color: #a33d3d;
+
+            font-weight: bold;
+        }
+
+
+        /* =========================================
+           CART FORM
+           ========================================= */
+
+        .cart-form {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-top: auto;
+        }
+
+
+        .quantity-input {
+
+            width: 65px;
+
+            height: 43px;
+
+            border: 1px solid #d9cbc2;
+
+            border-radius: 8px;
+
+            background: #fff;
+
+            color: #112250;
+
+            padding: 8px;
+
+            font-family: inherit;
+
+            text-align: center;
+        }
+
+
+        .quantity-input:focus {
+
+            outline: none;
+
+            border-color: #30507d;
+        }
+
+
+        .cart-button {
+
+            flex: 1;
+
+            height: 43px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #112250;
+
+            color: #f5f0e9;
+
+            font-family: inherit;
+
+            font-size: 13px;
+
+            cursor: pointer;
+
+            transition: 0.25s;
+        }
+
+
+        .cart-button:hover {
+
+            background: #30507d;
+
+            transform: translateY(-1px);
+        }
+
+
+        .cart-button:disabled {
+
+            background: #b8b3ae;
+
+            cursor: not-allowed;
+
+            transform: none;
+        }
+
+
+        /* =========================================
+           NO PRODUCTS
+           ========================================= */
+
+        .no-products {
+
+            grid-column: 1 / -1;
+
+            text-align: center;
+
+            padding: 60px 20px;
+
+            background: #fdfbf8;
+
+            border: 1px solid #d9cbc2;
+
+            border-radius: 18px;
+
+            color: #6b6d7c;
+        }
+
+
+        .no-products h3 {
+
+            color: #112250;
+
+            font-size: 24px;
+
+            font-weight: 400;
+
+            margin-bottom: 10px;
         }
 
 
@@ -462,20 +821,68 @@
 
 
         /* =========================================
-           MOBILE
+           TABLET
            ========================================= */
 
-        @media (max-width: 800px) {
+        @media (max-width: 950px) {
+
+            .product-grid {
+
+                grid-template-columns:
+                        repeat(2, minmax(0, 1fr));
+            }
 
             .navbar {
 
-                padding: 20px;
+                padding: 20px 30px;
+            }
+
+            .nav-links {
+
+                gap: 18px;
+            }
+        }
+
+
+        /* =========================================
+           MOBILE
+           ========================================= */
+
+        @media (max-width: 700px) {
+
+            .navbar {
+
+                padding: 18px 20px;
+
+                flex-wrap: wrap;
+
+                gap: 15px;
             }
 
 
             .nav-links {
 
                 display: none;
+            }
+
+
+            .nav-user {
+
+                margin-left: auto;
+            }
+
+
+            .welcome {
+
+                display: none;
+            }
+
+
+            .hero {
+
+                min-height: 55vh;
+
+                padding: 60px 20px;
             }
 
 
@@ -491,11 +898,34 @@
             }
 
 
+            .products-section {
+
+                padding: 60px 20px;
+            }
+
+
+            .products-heading h2 {
+
+                font-size: 31px;
+            }
+
+
+            .product-grid {
+
+                grid-template-columns: 1fr;
+            }
+
+
             .account-card {
 
                 width: 100%;
             }
 
+
+            .features {
+
+                padding: 60px 20px;
+            }
         }
 
     </style>
@@ -512,7 +942,7 @@
 
 <header class="navbar">
 
-    <a href="buyer.jsp"
+    <a href="${pageContext.request.contextPath}/index.jsp"
        class="logo">
 
         KAWAII CRATE
@@ -522,20 +952,30 @@
 
     <nav class="nav-links">
 
-        <a href="buyer.jsp">
+        <a href="${pageContext.request.contextPath}/index.jsp">
             Home
         </a>
 
-        <a href="#">
+        <a href="#products">
             Shop
         </a>
 
-        <a href="#">
+        <a href="#products">
             Categories
         </a>
 
-        <a href="#">
+        <a href="#features">
             About
+        </a>
+
+        <!-- NEW: CART LINK -->
+        <a href="${pageContext.request.contextPath}/cart.jsp">
+            Cart ♡
+        </a>
+
+        <!-- NEW: ORDERS LINK -->
+        <a href="${pageContext.request.contextPath}/orders.jsp">
+            My Orders
         </a>
 
     </nav>
@@ -583,7 +1023,9 @@
 
         <h1>
 
-            Hello, <span><%= userName %></span> ♡
+            Hello,
+            <span><%= userName %></span>
+            ♡
 
         </h1>
 
@@ -601,7 +1043,7 @@
         </p>
 
 
-        <a href="#"
+        <a href="#products"
            class="shop-button">
 
             Explore the Collection ✦
@@ -672,10 +1114,199 @@
 
 
 <!-- =========================================
+     PRODUCTS
+     ========================================= -->
+
+<section class="products-section"
+         id="products">
+
+
+    <div class="products-heading">
+
+        <p class="small-title">
+            KAWAII COLLECTION
+        </p>
+
+
+        <h2>
+            Shop Our Products
+        </h2>
+
+
+        <p>
+            Discover something lovely from our collection.
+            Add your favourites to your cart and enjoy
+            your Kawaii Crate experience.
+        </p>
+
+    </div>
+
+
+
+    <div class="product-grid">
+
+
+        <%
+            if (allProducts == null || allProducts.isEmpty()) {
+        %>
+
+
+            <div class="no-products">
+
+                <h3>
+                    No Products Available
+                </h3>
+
+                <p>
+                    There are currently no products
+                    available in the store.
+                </p>
+
+            </div>
+
+
+        <%
+            } else {
+
+                int productNumber = 1;
+
+                for (com.kawaiicrate.model.Product p : allProducts) {
+
+                    boolean available = p.getStockQty() > 0;
+
+                    String imgUrl = p.getImageUrl();
+                    boolean hasImage = imgUrl != null && !imgUrl.trim().isEmpty();
+        %>
+
+
+            <div class="product-card">
+
+
+                <!-- NEW: PRODUCT IMAGE, straight from the seller's URL -->
+                <% if (hasImage) { %>
+
+                    <img
+                        class="product-image"
+                        src="<%= imgUrl %>"
+                        alt="<%= p.getName() %>"
+                        onerror="this.onerror=null;this.style.display='none';"
+                    >
+
+                <% } %>
+
+
+                <div class="product-number">
+
+                    PRODUCT
+                    <%= String.format("%02d", productNumber++) %>
+
+                </div>
+
+
+                <h3>
+                    <%= p.getName() %>
+                </h3>
+
+
+                <p class="product-category">
+
+                    <%= p.getCategory() %>
+
+                </p>
+
+
+                <div class="product-details">
+
+                    <span class="product-price">
+
+                        ₹<%= p.getPrice() %>
+
+                    </span>
+
+
+                    <span class="<%= available
+                            ? "product-stock"
+                            : "product-stock out-of-stock" %>">
+
+                        <% if (available) { %>
+
+                            Stock: <%= p.getStockQty() %>
+
+                        <% } else { %>
+
+                            Out of Stock
+
+                        <% } %>
+
+                    </span>
+
+                </div>
+
+
+                <form
+                        action="${pageContext.request.contextPath}/cart"
+                        method="post"
+                        class="cart-form"
+                >
+
+
+                    <input
+                            type="hidden"
+                            name="productId"
+                            value="<%= p.getId() %>"
+                    >
+
+
+                    <input
+                            type="number"
+                            name="quantity"
+                            value="1"
+                            min="1"
+                            max="<%= p.getStockQty() %>"
+                            class="quantity-input"
+                            <%= available ? "" : "disabled" %>
+                    >
+
+
+                    <button
+                            type="submit"
+                            class="cart-button"
+                            <%= available ? "" : "disabled" %>
+                    >
+
+                        <%= available
+                                ? "Add to Cart"
+                                : "Unavailable" %>
+
+                    </button>
+
+
+                </form>
+
+
+            </div>
+
+
+        <%
+                }
+
+            }
+        %>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
      FEATURES
      ========================================= -->
 
-<section class="features">
+<section class="features"
+         id="features">
+
 
     <h2>
         Made for Cute Things ✦

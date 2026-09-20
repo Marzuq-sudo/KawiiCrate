@@ -14,8 +14,10 @@
         return;
     }
 
+
     String userRole =
             (String) session.getAttribute("userRole");
+
 
     if (userRole == null ||
             !"SELLER".equalsIgnoreCase(userRole)) {
@@ -27,16 +29,52 @@
         return;
     }
 
+
     String sellerName =
-    (String) session.getAttribute("userName");
+            (String) session.getAttribute("userName");
 
-String sellerEmail =
-    (String) session.getAttribute("userEmail");
+    String sellerEmail =
+            (String) session.getAttribute("userEmail");
 
-com.kawaiicrate.dao.ProductDAO productDAO = new com.kawaiicrate.dao.ProductDAO();
-java.util.List<com.kawaiicrate.model.Product> myProducts = productDAO.getProductsBySeller(((com.kawaiicrate.model.User) session.getAttribute("user")).getId());
-String productError = (String) session.getAttribute("productError");
-session.removeAttribute("productError");
+    int sellerId =
+            ((com.kawaiicrate.model.User)
+                    session.getAttribute("user")).getId();
+
+
+    com.kawaiicrate.dao.ProductDAO productDAO =
+            new com.kawaiicrate.dao.ProductDAO();
+
+    java.util.List<com.kawaiicrate.model.Product> myProducts =
+            productDAO.getProductsBySeller(sellerId);
+
+
+    // =========================================
+    // REAL SALES DATA (replaces hardcoded stats)
+    // =========================================
+
+    com.kawaiicrate.dao.OrderDAO orderDAO =
+            new com.kawaiicrate.dao.OrderDAO();
+
+    java.util.List<com.kawaiicrate.model.SellerOrderItem> sales =
+            orderDAO.getSalesBySeller(sellerId);
+
+    java.util.Set<Integer> distinctOrderIds = new java.util.HashSet<>();
+    int itemsSold = 0;
+    java.math.BigDecimal totalEarnings = java.math.BigDecimal.ZERO;
+
+    for (com.kawaiicrate.model.SellerOrderItem s : sales) {
+        distinctOrderIds.add(s.getOrderId());
+        itemsSold += s.getQuantity();
+        totalEarnings = totalEarnings.add(s.getSubtotal());
+    }
+
+    int totalOrders = distinctOrderIds.size();
+
+
+    String productError =
+            (String) session.getAttribute("productError");
+
+    session.removeAttribute("productError");
 %>
 
 
@@ -68,6 +106,10 @@ session.removeAttribute("productError");
             box-sizing: border-box;
         }
 
+
+        /* =====================================================
+           BODY
+           ===================================================== */
 
         body {
 
@@ -135,6 +177,32 @@ session.removeAttribute("productError");
             text-align: center;
 
             margin-bottom: 48px;
+        }
+
+
+        /* =====================================================
+           BACK TO STOREFRONT
+           ===================================================== */
+
+        .storefront-link {
+
+            display: block;
+
+            text-align: center;
+
+            color: #dfe3ec;
+
+            text-decoration: none;
+
+            font-size: 12px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .storefront-link:hover {
+
+            color: #ffffff;
         }
 
 
@@ -636,6 +704,10 @@ session.removeAttribute("productError");
             letter-spacing: 1px;
         }
 
+        .status-pending { background: #f7ecd4; color: #8a6d1f; }
+        .status-completed { background: #e0efe1; color: #2f6b34; }
+        .status-cancelled { background: #f6e0df; color: #8a3d38; }
+
 
         /* =====================================================
            FOOTER
@@ -753,6 +825,16 @@ session.removeAttribute("productError");
         </div>
 
 
+        <!-- NEW: BACK TO STOREFRONT -->
+
+        <a href="${pageContext.request.contextPath}/index.jsp"
+           class="storefront-link">
+
+            ← Back to Storefront
+
+        </a>
+
+
         <div class="seller-badge">
 
             ✦ SELLER PANEL ✦
@@ -863,7 +945,7 @@ session.removeAttribute("productError");
 
 
         <!-- =================================================
-             STATISTICS
+             STATISTICS (now real)
              ================================================= -->
 
         <section class="stats">
@@ -880,7 +962,7 @@ session.removeAttribute("productError");
                 </div>
 
                 <div class="stat-number">
-                    0
+                    <%= myProducts.size() %>
                 </div>
 
             </div>
@@ -897,7 +979,7 @@ session.removeAttribute("productError");
                 </div>
 
                 <div class="stat-number">
-                    0
+                    <%= totalOrders %>
                 </div>
 
             </div>
@@ -914,7 +996,7 @@ session.removeAttribute("productError");
                 </div>
 
                 <div class="stat-number">
-                    0
+                    <%= itemsSold %>
                 </div>
 
             </div>
@@ -931,7 +1013,7 @@ session.removeAttribute("productError");
                 </div>
 
                 <div class="stat-number">
-                    ₹0
+                    ₹<%= totalEarnings %>
                 </div>
 
             </div>
@@ -1038,79 +1120,372 @@ session.removeAttribute("productError");
              PRODUCTS
              ================================================= -->
 
-             <section id="products" class="section">
-                <div class="section-header">
-                    <h2>My Products</h2>
-                    <span>Your shop inventory</span>
+        <section id="products"
+                 class="section">
+
+
+            <div class="section-header">
+
+                <h2>
+                    My Products
+                </h2>
+
+                <span>
+                    Your shop inventory
+                </span>
+
+            </div>
+
+
+            <% if (productError != null) { %>
+
+                <div style="
+                    background:#fbeceb;
+                    border:1px solid #e0b4b0;
+                    color:#8a3d38;
+                    padding:14px 18px;
+                    border-radius:10px;
+                    font-family:Arial, sans-serif;
+                    font-size:13px;
+                    margin-bottom:20px;
+                ">
+
+                    <%= productError %>
+
                 </div>
-            
-                <% if (productError != null) { %>
-                    <div style="background:#fbeceb;border:1px solid #e0b4b0;color:#8a3d38;padding:14px 18px;border-radius:10px;font-family:Arial, sans-serif;font-size:13px;margin-bottom:20px;">
-                        <%= productError %>
+
+            <% } %>
+
+
+            <form
+                    action="${pageContext.request.contextPath}/addProduct"
+                    method="post"
+                    style="
+                        display:grid;
+                        grid-template-columns:repeat(2, 1fr);
+                        gap:16px;
+                        background:#f8f4ee;
+                        border:1px solid #d9cbc2;
+                        border-radius:14px;
+                        padding:25px;
+                        margin-bottom:30px;
+                        font-family:Arial, sans-serif;
+                    "
+            >
+
+
+                <div>
+
+                    <label style="
+                        font-size:11px;
+                        letter-spacing:1px;
+                        color:#777a89;
+                        display:block;
+                        margin-bottom:6px;
+                    ">
+
+                        PRODUCT NAME
+
+                    </label>
+
+
+                    <input
+                            type="text"
+                            name="name"
+                            required
+                            style="
+                                width:100%;
+                                padding:11px 13px;
+                                border:1px solid #d9cbc2;
+                                border-radius:8px;
+                                font-family:Arial, sans-serif;
+                            "
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label style="
+                        font-size:11px;
+                        letter-spacing:1px;
+                        color:#777a89;
+                        display:block;
+                        margin-bottom:6px;
+                    ">
+
+                        CATEGORY
+
+                    </label>
+
+
+                    <input
+                            type="text"
+                            name="category"
+                            placeholder="e.g. Stationery"
+                            style="
+                                width:100%;
+                                padding:11px 13px;
+                                border:1px solid #d9cbc2;
+                                border-radius:8px;
+                                font-family:Arial, sans-serif;
+                            "
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label style="
+                        font-size:11px;
+                        letter-spacing:1px;
+                        color:#777a89;
+                        display:block;
+                        margin-bottom:6px;
+                    ">
+
+                        PRICE (₹)
+
+                    </label>
+
+
+                    <input
+                            type="number"
+                            name="price"
+                            step="0.01"
+                            min="0"
+                            required
+                            style="
+                                width:100%;
+                                padding:11px 13px;
+                                border:1px solid #d9cbc2;
+                                border-radius:8px;
+                                font-family:Arial, sans-serif;
+                            "
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label style="
+                        font-size:11px;
+                        letter-spacing:1px;
+                        color:#777a89;
+                        display:block;
+                        margin-bottom:6px;
+                    ">
+
+                        STOCK QUANTITY
+
+                    </label>
+
+
+                    <input
+                            type="number"
+                            name="stockQty"
+                            min="0"
+                            required
+                            style="
+                                width:100%;
+                                padding:11px 13px;
+                                border:1px solid #d9cbc2;
+                                border-radius:8px;
+                                font-family:Arial, sans-serif;
+                            "
+                    >
+
+                </div>
+
+
+                <div style="grid-column:span 2;">
+
+                    <label style="
+                        font-size:11px;
+                        letter-spacing:1px;
+                        color:#777a89;
+                        display:block;
+                        margin-bottom:6px;
+                    ">
+
+                        IMAGE URL
+
+                    </label>
+
+
+                    <input
+                            type="text"
+                            name="imageUrl"
+                            placeholder="https://..."
+                            style="
+                                width:100%;
+                                padding:11px 13px;
+                                border:1px solid #d9cbc2;
+                                border-radius:8px;
+                                font-family:Arial, sans-serif;
+                            "
+                    >
+
+                </div>
+
+
+                <div style="grid-column:span 2;">
+
+                    <label style="
+                        font-size:11px;
+                        letter-spacing:1px;
+                        color:#777a89;
+                        display:block;
+                        margin-bottom:6px;
+                    ">
+
+                        DESCRIPTION
+
+                    </label>
+
+
+                    <textarea
+                            name="description"
+                            rows="3"
+                            style="
+                                width:100%;
+                                padding:11px 13px;
+                                border:1px solid #d9cbc2;
+                                border-radius:8px;
+                                font-family:Arial, sans-serif;
+                                resize:vertical;
+                            "
+                    ></textarea>
+
+                </div>
+
+
+                <div style="grid-column:span 2;">
+
+                    <button
+                            type="submit"
+                            style="
+                                background:#112250;
+                                color:#f5f0e9;
+                                border:none;
+                                padding:13px 24px;
+                                border-radius:9px;
+                                font-family:Arial, sans-serif;
+                                font-size:13px;
+                                letter-spacing:1px;
+                                cursor:pointer;
+                            "
+                    >
+
+                        ✦ ADD PRODUCT
+
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+            <% if (myProducts.isEmpty()) { %>
+
+
+                <div class="empty-products">
+
+                    <div class="icon">
+                        ♡
                     </div>
-                <% } %>
-            
-                <form action="${pageContext.request.contextPath}/addProduct" method="post"
-                      style="display:grid;grid-template-columns: repeat(2, 1fr);gap:16px;background:#f8f4ee;border:1px solid #d9cbc2;border-radius:14px;padding:25px;margin-bottom:30px;font-family:Arial, sans-serif;">
-            
-                    <div>
-                        <label style="font-size:11px;letter-spacing:1px;color:#777a89;display:block;margin-bottom:6px;">PRODUCT NAME</label>
-                        <input type="text" name="name" required style="width:100%;padding:11px 13px;border:1px solid #d9cbc2;border-radius:8px;font-family:Arial, sans-serif;">
-                    </div>
-                    <div>
-                        <label style="font-size:11px;letter-spacing:1px;color:#777a89;display:block;margin-bottom:6px;">CATEGORY</label>
-                        <input type="text" name="category" placeholder="e.g. Stationery" style="width:100%;padding:11px 13px;border:1px solid #d9cbc2;border-radius:8px;font-family:Arial, sans-serif;">
-                    </div>
-                    <div>
-                        <label style="font-size:11px;letter-spacing:1px;color:#777a89;display:block;margin-bottom:6px;">PRICE (₹)</label>
-                        <input type="number" name="price" step="0.01" min="0" required style="width:100%;padding:11px 13px;border:1px solid #d9cbc2;border-radius:8px;font-family:Arial, sans-serif;">
-                    </div>
-                    <div>
-                        <label style="font-size:11px;letter-spacing:1px;color:#777a89;display:block;margin-bottom:6px;">STOCK QUANTITY</label>
-                        <input type="number" name="stockQty" min="0" required style="width:100%;padding:11px 13px;border:1px solid #d9cbc2;border-radius:8px;font-family:Arial, sans-serif;">
-                    </div>
-                    <div style="grid-column: span 2;">
-                        <label style="font-size:11px;letter-spacing:1px;color:#777a89;display:block;margin-bottom:6px;">IMAGE URL</label>
-                        <input type="text" name="imageUrl" placeholder="https://..." style="width:100%;padding:11px 13px;border:1px solid #d9cbc2;border-radius:8px;font-family:Arial, sans-serif;">
-                    </div>
-                    <div style="grid-column: span 2;">
-                        <label style="font-size:11px;letter-spacing:1px;color:#777a89;display:block;margin-bottom:6px;">DESCRIPTION</label>
-                        <textarea name="description" rows="3" style="width:100%;padding:11px 13px;border:1px solid #d9cbc2;border-radius:8px;font-family:Arial, sans-serif;resize:vertical;"></textarea>
-                    </div>
-                    <div style="grid-column: span 2;">
-                        <button type="submit" style="background:#112250;color:#f5f0e9;border:none;padding:13px 24px;border-radius:9px;font-family:Arial, sans-serif;font-size:13px;letter-spacing:1px;cursor:pointer;">✦ ADD PRODUCT</button>
-                    </div>
-                </form>
-            
-                <% if (myProducts.isEmpty()) { %>
-                    <div class="empty-products">
-                        <div class="icon">♡</div>
-                        <h3>No Products Yet</h3>
-                        <p>Your products will appear here once you add them to Kawaii Crate.</p>
-                    </div>
-                <% } else { %>
-                    <table class="orders-table">
-                        <thead>
-                        <tr><th>NAME</th><th>CATEGORY</th><th>PRICE</th><th>STOCK</th></tr>
-                        </thead>
-                        <tbody>
-                        <% for (com.kawaiicrate.model.Product p : myProducts) { %>
-                            <tr>
-                                <td><%= p.getName() %></td>
-                                <td><%= (p.getCategory() == null || p.getCategory().isEmpty()) ? "—" : p.getCategory() %></td>
-                                <td>₹<%= p.getPrice() %></td>
-                                <td><%= p.getStockQty() %></td>
-                            </tr>
-                        <% } %>
-                        </tbody>
-                    </table>
-                <% } %>
-            </section>
+
+                    <h3>
+                        No Products Yet
+                    </h3>
+
+                    <p>
+                        Your products will appear here once
+                        you add them to Kawaii Crate.
+                    </p>
+
+                </div>
+
+
+            <% } else { %>
+
+
+                <table class="orders-table">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            NAME
+                        </th>
+
+                        <th>
+                            CATEGORY
+                        </th>
+
+                        <th>
+                            PRICE
+                        </th>
+
+                        <th>
+                            STOCK
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    <% for (
+                            com.kawaiicrate.model.Product p
+                            : myProducts
+                    ) { %>
+
+                        <tr>
+
+                            <td>
+                                <%= p.getName() %>
+                            </td>
+
+                            <td>
+                                <%= (p.getCategory() == null ||
+                                     p.getCategory().isEmpty())
+                                        ? "—"
+                                        : p.getCategory() %>
+                            </td>
+
+                            <td>
+                                ₹<%= p.getPrice() %>
+                            </td>
+
+                            <td>
+                                <%= p.getStockQty() %>
+                            </td>
+
+                        </tr>
+
+                    <% } %>
+
+                    </tbody>
+
+                </table>
+
+
+            <% } %>
+
+        </section>
 
 
 
         <!-- =================================================
-             ORDERS
+             ORDERS (now real)
              ================================================= -->
 
         <section id="orders"
@@ -1164,20 +1539,46 @@ session.removeAttribute("productError");
 
                 <tbody>
 
-                <tr>
+                <% if (sales.isEmpty()) { %>
 
-                    <td colspan="5"
-                        style="
-                        text-align:center;
-                        padding:35px;
-                        color:#888b98;
-                        ">
+                    <tr>
 
-                        ♡ No orders yet ♡
+                        <td colspan="5"
+                            style="
+                                text-align:center;
+                                padding:35px;
+                                color:#888b98;
+                            ">
 
-                    </td>
+                            ♡ No orders yet ♡
 
-                </tr>
+                        </td>
+
+                    </tr>
+
+                <% } else {
+                    for (com.kawaiicrate.model.SellerOrderItem s : sales) {
+                        String st = s.getStatus() == null ? "PENDING" : s.getStatus();
+                        String statusClass = "status status-pending";
+                        if ("COMPLETED".equalsIgnoreCase(st)) statusClass = "status status-completed";
+                        else if ("CANCELLED".equalsIgnoreCase(st)) statusClass = "status status-cancelled";
+                %>
+
+                    <tr>
+
+                        <td>#<%= s.getOrderId() %></td>
+
+                        <td><%= s.getBuyerName() %></td>
+
+                        <td><%= s.getProductName() %> ×<%= s.getQuantity() %></td>
+
+                        <td>₹<%= s.getSubtotal() %></td>
+
+                        <td><span class="<%= statusClass %>"><%= st %></span></td>
+
+                    </tr>
+
+                <% } } %>
 
                 </tbody>
 
