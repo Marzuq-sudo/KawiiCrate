@@ -17,21 +17,19 @@ public class LoginServlet extends HttpServlet {
 
     private UserDAO userDAO;
 
-
-    // =====================================================
-    // INITIALIZE
-    // =====================================================
-
     @Override
     public void init() throws ServletException {
-
         userDAO = new UserDAO();
     }
 
+    private void fail(HttpServletRequest request,
+                      HttpServletResponse response,
+                      String message)
+            throws ServletException, IOException {
 
-    // =====================================================
-    // LOGIN
-    // =====================================================
+        request.setAttribute("error", message);
+        request.getRequestDispatcher("/login.jsp").forward(request, response);
+    }
 
     @Override
     protected void doPost(
@@ -41,190 +39,92 @@ public class LoginServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        String selectedRole = request.getParameter("role");
 
-        // =================================================
-        // GET LOGIN DATA
-        // =================================================
+        // ---------- basic validation ----------
 
-        String email =
-                request.getParameter("email");
-
-        String password =
-                request.getParameter("password");
-
-
-        // =================================================
-        // VALIDATION
-        // =================================================
-
-        if (email == null ||
-                password == null ||
-                email.trim().isEmpty() ||
-                password.isEmpty()) {
-
-            request.setAttribute(
-                    "error",
-                    "Please enter your email and password."
-            );
-
-            request.getRequestDispatcher(
-                    "/login.jsp"
-            ).forward(request, response);
-
+        if (email == null || password == null
+                || email.trim().isEmpty() || password.isEmpty()) {
+            fail(request, response, "Please enter your email and password.");
             return;
         }
 
+        // The form only offers BUYER and SELLER. Anything else
+        // (including a hand-edited "ADMIN") is rejected.
+        selectedRole = selectedRole == null ? "" : selectedRole.trim().toUpperCase();
+
+        if (!selectedRole.equals("BUYER") && !selectedRole.equals("SELLER")) {
+            fail(request, response, "Please choose Buyer or Seller.");
+            return;
+        }
 
         email = email.trim().toLowerCase();
 
-
-        // =================================================
-        // CHECK USER
-        // =================================================
-
         try {
 
-            User user =
-                    userDAO.login(
-                            email,
-                            password
-                    );
+            // ---------- check credentials ----------
 
+            User user = userDAO.login(email, password);
 
-            // =================================================
-            // LOGIN SUCCESS
-            // =================================================
-
-            if (user != null) {
-
-                HttpSession session =
-                        request.getSession(true);
-
-
-                // Store user information
-                session.setAttribute(
-                        "user",
-                        user
-                );
-
-
-                session.setAttribute(
-                        "userId",
-                        user.getId()
-                );
-
-
-                session.setAttribute(
-                        "userName",
-                        user.getName()
-                );
-
-
-                session.setAttribute(
-                        "userEmail",
-                        user.getEmail()
-                );
-
-
-                session.setAttribute(
-                        "userRole",
-                        user.getRole()
-                );
-
-
-                // =================================================
-                // GET ROLE FROM DATABASE
-                // =================================================
-
-                String role =
-                        user.getRole();
-
-
-                // =================================================
-                // ADMIN
-                // =================================================
-
-                if ("ADMIN".equalsIgnoreCase(role)) {
-
-                    response.sendRedirect(
-                            request.getContextPath()
-                                    + "/admin.jsp"
-                    );
-
-                    return;
-                }
-
-
-                // =================================================
-                // SELLER
-                // =================================================
-
-                if ("SELLER".equalsIgnoreCase(role)) {
-
-                    response.sendRedirect(
-                            request.getContextPath()
-                                    + "/seller.jsp"
-                    );
-
-                    return;
-                }
-
-
-                // =================================================
-                // BUYER
-                // =================================================
-
-                response.sendRedirect(
-                        request.getContextPath()
-                                + "/buyer.jsp"
-                );
-
+            if (user == null) {
+                fail(request, response, "Invalid email or password.");
                 return;
             }
 
+            String actualRole = user.getRole() == null
+                    ? "BUYER"
+                    : user.getRole().trim().toUpperCase();
 
-            // =================================================
-            // INVALID LOGIN
-            // =================================================
+            // ---------- role check (done on the server) ----------
+            // Admins skip the selector. Everyone else must pick the
+            // role their account actually has.
 
-            request.setAttribute(
-                    "error",
-                    "Invalid email or password."
-            );
+            boolean isAdmin = actualRole.equals("ADMIN");
 
+            if (!isAdmin && !actualRole.equals(selectedRole)) {
 
-            request.getRequestDispatcher(
-                    "/login.jsp"
-            ).forward(
-                    request,
-                    response
-            );
+                String nice = actualRole.equals("SELLER") ? "Seller" : "Buyer";
 
+                fail(request, response,
+                        "This account is registered as a " + nice
+                                + ". Please select " + nice + " to log in.");
+                return;
+            }
+
+            // ---------- success: create a fresh session ----------
+
+            HttpSession old = request.getSession(false);
+            if (old != null) {
+                old.invalidate();
+            }
+
+            HttpSession session = request.getSession(true);
+
+            session.setAttribute("user", user);
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("userName", user.getName());
+            session.setAttribute("userEmail", user.getEmail());
+            session.setAttribute("userRole", actualRole);
+
+            String target;
+            if (isAdmin) {
+                target = "/admin.jsp";
+            } else if (actualRole.equals("SELLER")) {
+                target = "/seller.jsp";
+            } else {
+                target = "/buyer.jsp";
+            }
+
+            response.sendRedirect(request.getContextPath() + target);
 
         } catch (Exception e) {
 
             e.printStackTrace();
-
-
-            request.setAttribute(
-                    "error",
-                    "Unable to login. Please try again."
-            );
-
-
-            request.getRequestDispatcher(
-                    "/login.jsp"
-            ).forward(
-                    request,
-                    response
-            );
+            fail(request, response, "Unable to login. Please try again.");
         }
     }
-
-
-    // =====================================================
-    // GET /login
-    // =====================================================
 
     @Override
     protected void doGet(
@@ -232,9 +132,6 @@ public class LoginServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        response.sendRedirect(
-                request.getContextPath()
-                        + "/login.jsp"
-        );
+        response.sendRedirect(request.getContextPath() + "/login.jsp");
     }
 }

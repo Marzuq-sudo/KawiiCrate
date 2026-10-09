@@ -1,5 +1,27 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
+<%!
+    // Escapes user-typed text before putting it back in an HTML attribute
+    private static String esc(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+%>
+
+<%
+    // Keep what the user already typed when the servlet forwards back with an error
+    // (passwords are never sent back)
+    String enteredName = esc(request.getParameter("name"));
+    String enteredEmail = esc(request.getParameter("email"));
+
+    String chosenRole = request.getParameter("role");
+    boolean sellerChosen = chosenRole != null && "SELLER".equalsIgnoreCase(chosenRole.trim());
+%>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -304,6 +326,91 @@
 
 
         /* =========================
+           ROLE SELECTOR (Buyer / Seller)
+           ========================= */
+
+        .role-group {
+            border: 0;
+            margin: 0 0 20px;
+            padding: 0;
+            text-align: left;
+        }
+
+        .role-group legend {
+            color: #112250;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 0;
+            margin-bottom: 10px;
+        }
+
+        .role-options {
+            display: flex;
+            gap: 12px;
+        }
+
+        .role-option {
+            flex: 1;
+            position: relative;
+        }
+
+        /* the real radio is hidden; its label is the clickable card */
+        .role-option input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .role-option .role-card {
+            display: block;
+
+            padding: 14px 10px;
+
+            border: 1px solid #d9cbc2;
+            border-radius: 10px;
+
+            background: #fdfbf8;
+
+            color: #485070;
+
+            text-align: center;
+
+            transition: 0.2s ease;
+        }
+
+        .role-card strong {
+            display: block;
+            font-size: 15px;
+            margin-bottom: 3px;
+        }
+
+        .role-card small {
+            font-size: 11px;
+            opacity: 0.85;
+        }
+
+        .role-option:hover .role-card {
+            border-color: #30507d;
+        }
+
+        .role-option input:checked + .role-card {
+            background: #112250;
+            border-color: #112250;
+            color: #f5f0e9;
+        }
+
+        .role-option input:focus-visible + .role-card {
+            box-shadow:
+                0 0 0 3px rgba(48, 80, 125, 0.25);
+        }
+
+
+        /* =========================
            FORM
            ========================= */
 
@@ -558,15 +665,15 @@
             Home
         </a>
 
-        <a href="${pageContext.request.contextPath}/index.jsp">
+        <a href="${pageContext.request.contextPath}/index.jsp#shop">
             Shop
         </a>
 
-        <a href="${pageContext.request.contextPath}/index.jsp">
+        <a href="${pageContext.request.contextPath}/index.jsp#categories">
             Categories
         </a>
 
-        <a href="${pageContext.request.contextPath}/index.jsp">
+        <a href="${pageContext.request.contextPath}/index.jsp#about">
             About
         </a>
 
@@ -664,6 +771,58 @@
               method="post">
 
 
+            <!-- BUYER / SELLER -->
+
+            <fieldset class="role-group">
+
+                <legend>I want to join as</legend>
+
+                <div class="role-options">
+
+                    <div class="role-option">
+
+                        <input
+                            type="radio"
+                            id="role-buyer"
+                            name="role"
+                            value="BUYER"
+                            <%= sellerChosen ? "" : "checked" %>>
+
+                        <label for="role-buyer" class="role-card">
+
+                            <strong>♡ Buyer</strong>
+
+                            <small>Shop &amp; order</small>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="role-option">
+
+                        <input
+                            type="radio"
+                            id="role-seller"
+                            name="role"
+                            value="SELLER"
+                            <%= sellerChosen ? "checked" : "" %>>
+
+                        <label for="role-seller" class="role-card">
+
+                            <strong>✦ Seller</strong>
+
+                            <small>Sell my products</small>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </fieldset>
+
+
             <!-- NAME -->
 
             <div class="form-group">
@@ -680,6 +839,7 @@
                     id="name"
                     name="name"
                     placeholder="Enter your full name"
+                    value="<%= enteredName %>"
                     required>
 
             </div>
@@ -702,6 +862,7 @@
                     id="email"
                     name="email"
                     placeholder="Enter your email"
+                    value="<%= enteredEmail %>"
                     required>
 
             </div>

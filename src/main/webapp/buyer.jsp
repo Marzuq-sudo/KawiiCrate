@@ -26,8 +26,46 @@
     com.kawaiicrate.dao.ProductDAO productDAO =
             new com.kawaiicrate.dao.ProductDAO();
 
+    // ----- search / filter / sort from the URL (?q=...&category=...&sort=...) -----
+
+    String q = request.getParameter("q");
+    String selectedCategory = request.getParameter("category");
+    String sort = request.getParameter("sort");
+
+    if (q == null) q = "";
+    if (selectedCategory == null) selectedCategory = "";
+    if (sort == null) sort = "";
+
+    boolean filtering =
+            !q.trim().isEmpty() || !selectedCategory.trim().isEmpty();
+
+    // Matching products (searchProducts already handles the keyword + category SQL)
     java.util.List<com.kawaiicrate.model.Product> allProducts =
-            productDAO.getAllProducts();
+            new java.util.ArrayList<>(
+                    productDAO.searchProducts(q, selectedCategory)
+            );
+
+    if ("price_asc".equals(sort)) {
+        allProducts.sort(java.util.Comparator.comparing(
+                com.kawaiicrate.model.Product::getPrice));
+    } else if ("price_desc".equals(sort)) {
+        allProducts.sort(java.util.Comparator.comparing(
+                com.kawaiicrate.model.Product::getPrice).reversed());
+    }
+
+    // Category dropdown is built from ALL products so it never shrinks while filtering
+    java.util.LinkedHashSet<String> categoryOptions =
+            new java.util.LinkedHashSet<>();
+
+    for (com.kawaiicrate.model.Product cp : productDAO.getAllProducts()) {
+        if (cp.getCategory() != null && !cp.getCategory().trim().isEmpty()) {
+            categoryOptions.add(cp.getCategory().trim());
+        }
+    }
+
+    // Safe text for putting back into the search box
+    String qSafe = q.replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace("\"", "&quot;");
 %>
 
 
@@ -432,6 +470,147 @@
             font-size: 14px;
 
             line-height: 1.7;
+        }
+
+
+        /* =========================================
+           SEARCH + FILTER BAR
+           ========================================= */
+
+        .filter-bar {
+
+            display: flex;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+
+            align-items: center;
+
+            background: #fdfbf8;
+
+            border: 1px solid #d9cbc2;
+
+            border-radius: 14px;
+
+            padding: 16px;
+
+            margin-bottom: 30px;
+        }
+
+
+        .filter-bar input[type="text"] {
+
+            flex: 2;
+
+            min-width: 200px;
+
+            height: 44px;
+
+            border: 1px solid #d9cbc2;
+
+            border-radius: 9px;
+
+            background: #fff;
+
+            color: #112250;
+
+            padding: 0 14px;
+
+            font-family: inherit;
+
+            font-size: 14px;
+        }
+
+
+        .filter-bar select {
+
+            flex: 1;
+
+            min-width: 150px;
+
+            height: 44px;
+
+            border: 1px solid #d9cbc2;
+
+            border-radius: 9px;
+
+            background: #fff;
+
+            color: #112250;
+
+            padding: 0 10px;
+
+            font-family: inherit;
+
+            font-size: 14px;
+        }
+
+
+        .filter-bar input:focus,
+        .filter-bar select:focus {
+
+            outline: none;
+
+            border-color: #30507d;
+        }
+
+
+        .filter-bar button {
+
+            height: 44px;
+
+            padding: 0 24px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background: #112250;
+
+            color: #f5f0e9;
+
+            font-family: inherit;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            transition: 0.25s;
+        }
+
+
+        .filter-bar button:hover {
+
+            background: #30507d;
+        }
+
+
+        .filter-bar .clear-link {
+
+            color: #485070;
+
+            font-size: 13px;
+
+            text-decoration: none;
+        }
+
+
+        .filter-bar .clear-link:hover {
+
+            color: #112250;
+
+            text-decoration: underline;
+        }
+
+
+        .result-count {
+
+            color: #6b6d7c;
+
+            font-size: 13px;
+
+            margin-bottom: 18px;
         }
 
 
@@ -1143,6 +1322,73 @@
 
 
 
+    <!-- SEARCH + FILTER -->
+
+    <form class="filter-bar"
+          method="get"
+          action="${pageContext.request.contextPath}/buyer.jsp#products">
+
+        <input
+                type="text"
+                name="q"
+                value="<%= qSafe %>"
+                placeholder="Search products by name..."
+        >
+
+        <select name="category">
+
+            <option value="">All categories</option>
+
+            <% for (String c : categoryOptions) { %>
+
+                <option value="<%= c.replace("\"", "&quot;") %>"
+                        <%= c.equals(selectedCategory.trim()) ? "selected" : "" %>>
+                    <%= c %>
+                </option>
+
+            <% } %>
+
+        </select>
+
+        <select name="sort">
+
+            <option value="">Newest first</option>
+
+            <option value="price_asc"
+                    <%= "price_asc".equals(sort) ? "selected" : "" %>>
+                Price: low to high
+            </option>
+
+            <option value="price_desc"
+                    <%= "price_desc".equals(sort) ? "selected" : "" %>>
+                Price: high to low
+            </option>
+
+        </select>
+
+        <button type="submit">Search ✦</button>
+
+        <% if (filtering || !sort.isEmpty()) { %>
+
+            <a class="clear-link"
+               href="${pageContext.request.contextPath}/buyer.jsp#products">
+                Clear
+            </a>
+
+        <% } %>
+
+    </form>
+
+
+    <% if (filtering) { %>
+
+        <p class="result-count">
+            <%= allProducts.size() %> product<%= allProducts.size() == 1 ? "" : "s" %> found
+        </p>
+
+    <% } %>
+
+
     <div class="product-grid">
 
 
@@ -1154,12 +1400,13 @@
             <div class="no-products">
 
                 <h3>
-                    No Products Available
+                    <%= filtering ? "No Matching Products" : "No Products Available" %>
                 </h3>
 
                 <p>
-                    There are currently no products
-                    available in the store.
+                    <%= filtering
+                            ? "Try a different word or clear the filters."
+                            : "There are currently no products available in the store." %>
                 </p>
 
             </div>
