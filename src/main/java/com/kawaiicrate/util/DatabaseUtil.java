@@ -6,13 +6,16 @@ import java.sql.DriverManager;
 public class DatabaseUtil {
 
     private static final String URL =
-            "jdbc:postgresql://localhost:5433/kawaiicrate";
+            System.getenv().getOrDefault(
+                    "DB_URL",
+                    "jdbc:postgresql://localhost:5433/kawaiicrate"
+            );
 
     private static final String USER =
-            "kawaii";
+            System.getenv().getOrDefault("DB_USER", "kawaii");
 
     private static final String PASSWORD =
-            "kawaii123";
+            System.getenv().getOrDefault("DB_PASSWORD", "");
 
     public static Connection getConnection() throws Exception {
         Class.forName("org.postgresql.Driver");

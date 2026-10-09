@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%@ page import="java.sql.Connection" %>
-<%@ page import="java.sql.DriverManager" %>
+<%@ page import="com.kawaiicrate.util.DatabaseUtil" %>
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
 <%@ page import="java.sql.SQLException" %>
@@ -44,16 +44,6 @@
     // DATABASE CONFIGURATION
     // =====================================================
 
-    String DB_URL =
-            "jdbc:postgresql://localhost:5433/kawaiicrate";
-
-    String DB_USER =
-            "kawaii";
-
-    String DB_PASSWORD =
-            "kawaii123";
-
-
     int totalUsers = 0;
     int totalBuyers = 0;
     int totalSellers = 0;
@@ -66,16 +56,8 @@
 
     try {
 
-        Class.forName("org.postgresql.Driver");
-
-
         try (
-                Connection connection =
-                        DriverManager.getConnection(
-                                DB_URL,
-                                DB_USER,
-                                DB_PASSWORD
-                        )
+                Connection connection = DatabaseUtil.getConnection()
         ) {
 
             // Total users
@@ -1114,18 +1096,9 @@
 
                         try {
 
-                            Class.forName(
-                                    "org.postgresql.Driver"
-                            );
-
-
                             try (
                                     Connection connection =
-                                            DriverManager.getConnection(
-                                                    DB_URL,
-                                                    DB_USER,
-                                                    DB_PASSWORD
-                                            );
+                                            DatabaseUtil.getConnection();
 
                                     PreparedStatement statement =
                                             connection.prepareStatement(
